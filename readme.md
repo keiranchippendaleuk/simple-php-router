@@ -9,3 +9,5 @@ and you can add your own pages in the pages folder feel free to fork this and us
 if you want to give credits
 
 enjoy the page router :)
+
+template.php is the core of the site like components not page
