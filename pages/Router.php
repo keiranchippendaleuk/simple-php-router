@@ -1,32 +1,30 @@
 <?php
 // Disable displaying PHP errors and notices to the user
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', '/path/to/error_log');
+error_reporting(0);
 
 // Retrieve the page URL and sanitize it
-$pageURL = isset($_GET['page']) ? $_GET['page'] : null;
-$pageLink = basename(parse_url($pageURL, PHP_URL_PATH));
+$pageURL = filter_input(INPUT_GET, 'page', FILTER_SANITIZE_URL);
+$pageLink = pathinfo($pageURL, PATHINFO_FILENAME);
 
 // Check if the page URL contains query parameters and sanitize them
+$params = array();
 if (strpos($pageURL, '?') !== false) {
-    $pageParams = parse_url($pageURL, PHP_URL_QUERY);
-    $params = array();
-    parse_str($pageParams, $params);
+    $query = parse_url($pageURL, PHP_URL_QUERY);
+    parse_str($query, $params);
 
-    foreach ($params as $key => $value) {
-        $params[$key] = filter_var($value, FILTER_SANITIZE_STRING);
+    foreach ($params as &$value) {
+        $value = filter_var($value, FILTER_SANITIZE_STRING);
     }
 }
 
 // Check if the requested page exists and is a PHP file
-$pageFile = "{$pageLink}.php";
-if (file_exists($pageFile) && is_file($pageFile) && pathinfo($pageFile, PATHINFO_EXTENSION) == 'php') {
+$pageFile = realpath("./{$pageLink}.php");
+if ($pageFile !== false && is_file($pageFile) && strtolower(pathinfo($pageFile, PATHINFO_EXTENSION)) === 'php') {
     // Load the requested page
-    require_once($pageFile);
+    require $pageFile;
 } else {
     // Log the request and display an error message to the user
-    error_log("Invalid page request: " . $_SERVER['REQUEST_URI']);
+    error_log("Invalid page request: {$_SERVER['REQUEST_URI']}");
     http_response_code(404);
     echo "Page not found";
 }
