@@ -18,7 +18,7 @@ if (strpos($pageURL, '?') !== false) {
 }
 
 // Check if the requested page exists and is a PHP file
-$pageFile = realpath("./{$pageLink}.php");
+$pageFile = realpath("{$pageLink}.php");
 if ($pageFile !== false && is_file($pageFile) && strtolower(pathinfo($pageFile, PATHINFO_EXTENSION)) === 'php') {
     // Load the requested page
     require $pageFile;
